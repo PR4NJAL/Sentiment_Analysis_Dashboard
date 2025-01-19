@@ -90,31 +90,31 @@ def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100, in
         print(f"Error fetching subreddit: {e}")
     return comments_data
 
-while True:
-    subreddit_name = input("\nEnter subreddit name (or 'quit' to exit): ")
+#while True:
+#    subreddit_name = input("\nEnter subreddit name (or 'quit' to exit): ")
     
-    if subreddit_name.lower() == 'quit':
-        break
+#    if subreddit_name.lower() == 'quit':
+#        break
 
-    post_keyword = input("Enter keywords to search for the post: ")
-    comment_limit = int(input("How many comments to analyze?: "))
-    include_replies = input("Include replies to comments? (y/n):").lower() == 'y'
+#    post_keyword = input("Enter keywords to search for the post: ")
+#    comment_limit = int(input("How many comments to analyze?: "))
+#    include_replies = input("Include replies to comments? (y/n):").lower() == 'y'
     
-    print(f"\nFetching data from r/{subreddit_name}...")
-    comments = fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit, include_replies)
+#    print(f"\nFetching data from r/{subreddit_name}...")
+#    comments = fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit, include_replies)
     
-    if comments:
-        df = pd.DataFrame(comments)
-        print("\nSummary Statistics:")
-        print(f"Total Comments Analyzed: {len(df)}")
-        print(f"Number of Positive Texts: {len(df[df['sentiment'] == 'positive'])}")
-        print(f"Number of Negative Texts: {len(df[df['sentiment'] == 'negative'])}")
-        print(f"Number of Neutral Texts: {len(df[df['sentiment'] == 'neutral'])}")
-        print(f"Most Positive Comment: {df.loc[df['compound'].idxmax()]['text'][:100]}...")
-        print(f"Most Negative Comment: {df.loc[df['compound'].idxmin()]['text'][:100]}...")
-        print("\nTop 3 Most Upvoted Comments:")
-        top_comments = df.nlargest(3, 'score')
-        for _, comment in top_comments.iterrows():
-            print(f"\nUpvotes: {comment['score']}")
-            print(f"Sentiment: {comment['compound']:.3f}")
-            print(f"Text: {comment['text'][:100]}...")
+#    if comments:
+#        df = pd.DataFrame(comments)
+#        print("\nSummary Statistics:")
+#        print(f"Total Comments Analyzed: {len(df)}")
+#        print(f"Number of Positive Texts: {len(df[df['sentiment'] == 'positive'])}")
+#        print(f"Number of Negative Texts: {len(df[df['sentiment'] == 'negative'])}")
+#        print(f"Number of Neutral Texts: {len(df[df['sentiment'] == 'neutral'])}")
+#        print(f"Most Positive Comment: {df.loc[df['compound'].idxmax()]['text'][:100]}...")
+#        print(f"Most Negative Comment: {df.loc[df['compound'].idxmin()]['text'][:100]}...")
+#        print("\nTop 3 Most Upvoted Comments:")
+#        top_comments = df.nlargest(3, 'score')
+#        for _, comment in top_comments.iterrows():
+#            print(f"\nUpvotes: {comment['score']}")
+#            print(f"Sentiment: {comment['compound']:.3f}")
+#            print(f"Text: {comment['text'][:100]}...")
