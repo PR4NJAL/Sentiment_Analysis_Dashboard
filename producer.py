@@ -1,4 +1,4 @@
-from api import fetch_subreddit_comments
+from api_fetch import fetch_subreddit_comments
 import pika
 import json
 
