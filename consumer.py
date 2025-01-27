@@ -1,21 +1,37 @@
 import pika
 import json
-import sys
 from processor import processor
 from calculate_statistics import calculate_statistics
+
 def main():
     connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
     channel = connection.channel()
     channel.queue_declare(queue='reddit')
 
+    processed_count = 0
+    comment_limit = None
     aggregated_data = []
 
     def callback(ch, method, properties, body):
+        nonlocal processed_count, comment_limit, aggregated_data
         try:
             data = json.loads(body)
-            comment_data = processor(data)
-            aggregated_data.append(comment_data)
-            ch.basic_ack(delivery_tag=method.delivery_tag)
+            if data.get('type') == 'metadata':
+                comment_limit = data['comment_limit']
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+                return
+            if data.get('type') == 'comment':
+                processed_count += 1
+                comment_data = processor(data)   
+                aggregated_data.append(comment_data)
+                print(f"Processed {processed_count}/{comment_limit} comments")
+                ch.basic_ack(delivery_tag=method.delivery_tag)
+            if processed_count == comment_limit:
+                print("\nAnalysis Complete:")
+                calculate_statistics(aggregated_data)
+                aggregated_data = []
+                print("Exiting after completing analysis.")
+                connection.close()
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON data: {e}")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
@@ -33,13 +49,10 @@ def main():
         channel.stop_consuming()
     except Exception as e:
         print(f"Unexpected error : {e}")
+        channel.stop_consuming()
     finally:
-        connection.close()
-        if aggregated_data:  
-            calculate_statistics(aggregated_data)
-        else:
-            print("No comments processed, no statistics to display.")
-        sys.exit(0)
+        if connection.is_open:
+            connection.close()
 
 if __name__ == '__main__':
     main()

@@ -64,7 +64,8 @@ def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100, in
                 return []
     except Exception as e:
         print(f"Error fetching subreddit: {e}")
-    return valid_comments[:comment_limit]
+    valid_comments = valid_comments[:comment_limit]
+    return valid_comments
 
 #while True:
 #    subreddit_name = input("\nEnter subreddit name (or 'quit' to exit): ")

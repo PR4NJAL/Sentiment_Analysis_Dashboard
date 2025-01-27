@@ -10,12 +10,21 @@ channel = connection.channel()
 channel.queue_declare(queue='reddit')
 
 def send_comments_to_queue(subreddit_name, post_keyword, comment_limit=100, include_replies=False):
+    
+    channel.basic_publish(
+        exchange='',
+        routing_key='reddit',
+        body=json.dumps({'type': 'metadata', 'comment_limit': comment_limit})
+    )
+
     comments = fetch_subreddit_comments(subreddit_name, 
                                         post_keyword, 
                                         comment_limit, 
                                         include_replies)
+
     if comments:
         for comment in comments:
+            comment['type'] = 'comment'
             channel.basic_publish(exchange='',
                                  routing_key='reddit',
                                  body=json.dumps(comment))
