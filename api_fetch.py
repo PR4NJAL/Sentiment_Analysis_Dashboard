@@ -1,7 +1,7 @@
 import praw
 import json
 import pandas as pd
-
+from .pre_processing import preprocess_reddit_comment
 with open('credentials.json') as f:
     credentials = json.load(f)
 
@@ -25,7 +25,7 @@ bot_usernames = [
         '[removed]'
     ]
 
-def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100, include_replies=False):
+def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100):
     subred = reddit.subreddit(subreddit_name)
     try:
         found_posts = False
@@ -34,17 +34,14 @@ def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100, in
             choice = input("Is this is the post you want to analyze? (y/n): ")
             if choice.lower() == 'y':
                 found_posts = True
-                submission.comments.replace_more(limit=0)
+                submission.comments.replace_more(limit=comment_limit)
                 valid_comments = []
-                if include_replies:
-                    all_comments = submission.comments.list()
-                else:
-                    all_comments = submission.comments
-                for comment in all_comments:                #Bas idhr ka darr h mujhe...logic me kuch glti na ho
+                for comment in submission.comments:                
                     if(comment.author is not None and str(comment.author) not in bot_usernames and 'bot' not in str(comment.author).lower()):
                         valid_comments.append({
-                            'text':comment.body,
-                            'score':comment.score})
+                            'text':preprocess_reddit_comment(comment.body),
+                            'score':comment.score,
+                            'created_utc': comment.created_utc})
                 valid_comments.sort(key=lambda x: x['score'], reverse=True)
             break
         if not found_posts:
@@ -55,16 +52,15 @@ def fetch_subreddit_comments(subreddit_name, post_keyword, comment_limit=100, in
             choice = input("Enter your choice (1/2/3): ")
             if choice == '1':
                 new_keyword = input("Enter new keyword: ")
-                return fetch_subreddit_comments(subreddit_name, new_keyword, comment_limit, include_replies)
+                return fetch_subreddit_comments(subreddit_name, new_keyword, comment_limit)
             elif choice == '2':
                 new_subreddit = input("Enter new subreddit name: ")
                 new_keyword = input("Enter new keyword: ")
-                return fetch_subreddit_comments(new_subreddit, new_keyword, comment_limit, include_replies)
+                return fetch_subreddit_comments(new_subreddit, new_keyword, comment_limit)
             else:
                 return []
     except Exception as e:
         print(f"Error fetching subreddit: {e}")
-    valid_comments = valid_comments[:comment_limit]
     return valid_comments
 
 #while True:

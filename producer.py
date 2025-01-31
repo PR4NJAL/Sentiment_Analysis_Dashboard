@@ -9,7 +9,7 @@ connection = pika.BlockingConnection(pika.ConnectionParameters('localhost'))
 channel = connection.channel()
 channel.queue_declare(queue='reddit')
 
-def send_comments_to_queue(subreddit_name, post_keyword, comment_limit=100, include_replies=False):
+def send_comments_to_queue(subreddit_name, post_keyword, comment_limit=100):
     
     channel.basic_publish(
         exchange='',
@@ -19,8 +19,7 @@ def send_comments_to_queue(subreddit_name, post_keyword, comment_limit=100, incl
 
     comments = fetch_subreddit_comments(subreddit_name, 
                                         post_keyword, 
-                                        comment_limit, 
-                                        include_replies)
+                                        comment_limit)
 
     if comments:
         for comment in comments:
@@ -41,10 +40,9 @@ if __name__ == '__main__':
 
         post_keyword = input("Enter keywords to search for the post: ")
         comment_limit = int(input("How many comments to analyze?: "))
-        include_replies = input("Include replies to comments? (y/n):").lower() == 'y'
     
         print(f"\nFetching data from r/{subreddit_name}...")
-        success = send_comments_to_queue(subreddit_name, post_keyword, comment_limit, include_replies)
+        success = send_comments_to_queue(subreddit_name, post_keyword, comment_limit)
 
         if not success:
             print("No comments found. Please try again.")
